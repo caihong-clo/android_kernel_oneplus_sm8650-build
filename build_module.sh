@@ -232,6 +232,13 @@ echo "========================================================"
 echo " Building external modules and installing them into staging directory"
 
 for EXT_MOD in ${EXT_MODULES}; do
+  # "<dir>:kbuild" is a directory whose Makefile is a kbuild file without make
+  # rules. Build it with the kernel make, like the LineageOS kernel build does.
+  EXT_MOD_KBUILD=
+  if [ "${EXT_MOD%:kbuild}" != "${EXT_MOD}" ]; then
+    EXT_MOD="${EXT_MOD%:kbuild}"
+    EXT_MOD_KBUILD=1
+  fi
   # The path that we pass in via the variable M needs to be a relative path
   # relative to the kernel source directory. The source files will then be
   # looked for in ${KERNEL_DIR}/${EXT_MOD_REL} and the object files (i.e. .o
@@ -381,8 +388,13 @@ for EXT_MOD in ${EXT_MODULES}; do
   else
     # Fall back on legacy make if Bazel build is not present
     echo "warning - building kernel modules with legacy make. Please migrate to DDK."
-    make -C ${EXT_MOD} M=${EXT_MOD_REL} KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR}  \
+    if [ -n "${EXT_MOD_KBUILD}" ]; then
+      make -C ${ROOT_DIR}/${KERNEL_DIR} M=${EXT_MOD_REL} O=${OUT_DIR} \
+                        "${TOOL_ARGS[@]}" ${MAKE_ARGS} modules
+    else
+      make -C ${EXT_MOD} M=${EXT_MOD_REL} KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR}  \
                         O=${OUT_DIR} "${TOOL_ARGS[@]}" ${MAKE_ARGS}
+    fi
   fi
 
   if [ -n "${INSTALL_MODULE_HEADERS}" ]; then
