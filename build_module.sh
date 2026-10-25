@@ -304,6 +304,7 @@ for EXT_MOD in ${EXT_MODULES}; do
 
   # Query for a target that matches the pattern for module distribution
   if [[ "$ENABLE_DDK_BUILD" = "true" || "$oplus_kernel_module" != "" ]] \
+     && [ -z "${EXT_MOD_KBUILD}" ] \
      && [ -n "$pkg_path" ] \
      && [ -n "$btgt" ] \
      && build_target=$(./tools/bazel query --ui_event_filters=-info --noshow_progress \
