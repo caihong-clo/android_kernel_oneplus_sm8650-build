@@ -298,6 +298,12 @@ for EXT_MOD in ${EXT_MODULES}; do
   set +e
   grep_string='vendor/oplus'
   oplus_kernel_module=$(echo ${module_path} | grep "${grep_string}")
+  # The Qualcomm, NXP and ST techpacks sit under vendor/oplus/<repo>/ in
+  # this tree (vendor/qcom/opensource etc. in the OnePlus one). They keep
+  # their own LOCAL_MODULE_DDK_BUILD choice.
+  if echo "${module_path}" | grep -qE "^vendor/oplus/[^/]+/(qcom|nxp|st)/"; then
+    oplus_kernel_module=""
+  fi
   echo "oplus_kernel_module is  $oplus_kernel_module"
   if [[ "${oplus_kernel_module}" != "" ]]
   then
